@@ -5,6 +5,8 @@ using System.IO;
 using System.Security.AccessControl;
 using System;
 using System.Security.Principal;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace EJRASync.Lib
 {
@@ -88,21 +90,53 @@ namespace EJRASync.Lib
             throw new Exception("Assetto Corsa installation not found.");
         }
 
-        public async Task SyncBucketAsync(string bucketName, string localPath, bool forceInstall)
+        public async Task SyncBucketAsync(string bucketName, string localPath, string yamlFile, bool forceInstall)
         {
             Console.WriteLine($"Syncing {bucketName} to {localPath}...");
             var s3Objects = await this.ListS3ObjectsAsync(bucketName);
-            //s3Objects.ForEach(o => Console.WriteLine($"Object: {o.Key}"));
+            // s3Objects.ForEach(o => Console.WriteLine($"Object: {o.Key}"));
             var localFiles = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
 
             var s3Keys = s3Objects.Select(o => o.Key).ToList();
             var localPaths = localFiles.Select(f => f.Replace(@"\", "").Replace(@"\", "/")).ToList();
+
+            var yamlObject = s3Objects.FirstOrDefault(o => o.Key == yamlFile);
+            List<string> yamlList = new();
+            
+            if (yamlObject == null)
+            {
+                Console.WriteLine($"No index found, downloading everything!");
+            }
+            else
+            {
+                // Read the contents of the YAML file
+                var request = new GetObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = yamlFile
+                };
+                using var response = await this._s3Client.GetObjectAsync(request);
+                using var responseStream = response.ResponseStream;
+                using var reader = new StreamReader(responseStream);
+                var yamlContents = await reader.ReadToEndAsync();
+                Console.WriteLine(yamlContents);
+
+                var deserializer = new DeserializerBuilder()
+                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                    .Build();
+
+                yamlList = deserializer.Deserialize<List<string>>(yamlContents);
+            }
 
             var downloadTasks = new List<Task>();
 
 
             foreach (var s3Object in s3Objects)
             {
+                // Only proceed for files that have a prefix that exists in yamlList
+                if (yamlObject != null && !yamlList.Any(s3Object.Key.StartsWith))
+                    continue;
+
                 try
                 {
                     var localFilePath = Path.Combine(localPath, s3Object.Key.Replace("/", @"\"));
@@ -263,12 +297,12 @@ namespace EJRASync.Lib
 
         public async Task SyncCarsAsync(bool forceInstall)
         {
-            await this.SyncBucketAsync(Constants.CarsBucketName, this._carsFolder, forceInstall);
+            await this.SyncBucketAsync(Constants.CarsBucketName, this._carsFolder, Constants.CarsYamlFile, forceInstall);
         }
 
         public async Task SyncTracksAsync(bool forceInstall)
         {
-            await this.SyncBucketAsync(Constants.TracksBucketName, this._tracksFolder, forceInstall);
+            await this.SyncBucketAsync(Constants.TracksBucketName, this._tracksFolder, Constants.TracksYamlFile, forceInstall);
         }
 
         public async Task SyncAllAsync(bool forceInstall = false)

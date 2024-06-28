@@ -21,5 +21,8 @@ namespace EJRASync.Lib
         };
         public static readonly string SteamLibraryFile = @"steamapps\libraryfolders.vdf";
         public static readonly string MinioUrl = "http://usw01.grahamweldon.com:9002";
+
+        public static readonly string CarsYamlFile = "cars.yaml";
+        public static readonly string TracksYamlFile = "tracks.yaml";
     }
 }
