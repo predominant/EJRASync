@@ -1,0 +1,19 @@
+﻿<Window x:Class="EJRASync.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EJRASync.UI"
+        mc:Ignorable="d"
+        Title="EJRA Sync Manager" Height="350" Width="525">
+    <Grid>
+        <DataGrid ItemsSource="{Binding ContentItems}" AutoGenerateColumns="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+                <DataGridTextColumn Header="Path" Binding="{Binding Status}" />
+            </DataGrid.Columns>
+        </DataGrid>
+        <Button Content="Sync" Command="{Binding SyncCommand}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10"></Button>
+    </Grid>
+</Window>
