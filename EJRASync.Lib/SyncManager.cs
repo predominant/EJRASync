@@ -148,11 +148,20 @@ namespace EJRASync.Lib
                     {
                         var localFileTime = File.GetLastWriteTime(localFilePath);
                         var s3ObjectTime = s3Object.LastModified.ToLocalTime();
-                        if (localFileTime >= s3ObjectTime)
+                        var localFileChecksum = FileChecksum.Calculate(localFilePath);
+                        var s3ObjectChecksum = s3Object.ETag.Trim('"');
+
+                        if (localFileChecksum == s3ObjectChecksum && !forceInstall)
                         {
                             Console.WriteLine($"Skipping {s3Object.Key}...");
                             continue;
                         }
+
+                        //if (localFileTime >= s3ObjectTime)
+                        //{
+                        //    Console.WriteLine($"Skipping {s3Object.Key}...");
+                        //    continue;
+                        //}
                     }
 
                     downloadTasks.Add(this.DownloadFileAsync(bucketName, s3Object.Key, localFilePath));
