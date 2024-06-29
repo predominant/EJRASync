@@ -16,6 +16,7 @@ namespace EJRASync.Lib
 
         private string _carsFolder = "cars";
         private string _tracksFolder = "tracks";
+        private string _fontsFolder = "fonts";
 
         public SyncManager(IAmazonS3 s3Client)
         {
@@ -31,6 +32,9 @@ namespace EJRASync.Lib
 
             this._tracksFolder = Path.Combine(acPath, "content", this._tracksFolder);
             Console.WriteLine($"Tracks folder: {this._tracksFolder}");
+
+            this._fontsFolder = Path.Combine(acPath, "content", this._fontsFolder);
+            Console.WriteLine($"Fonts folder: {this._fontsFolder}");
         }
 
         /// <summary>
@@ -100,10 +104,11 @@ namespace EJRASync.Lib
             var s3Keys = s3Objects.Select(o => o.Key).ToList();
             var localPaths = localFiles.Select(f => f.Replace(@"\", "").Replace(@"\", "/")).ToList();
 
-            var yamlObject = s3Objects.FirstOrDefault(o => o.Key == yamlFile);
             List<string> yamlList = new();
-            
-            if (yamlObject == null)
+
+            var yamlObject = s3Objects.FirstOrDefault(o => o.Key == yamlFile);
+
+            if (yamlFile == "" || yamlObject == null)
             {
                 Console.WriteLine($"No index found, downloading everything!");
             }
@@ -314,10 +319,16 @@ namespace EJRASync.Lib
             await this.SyncBucketAsync(Constants.TracksBucketName, this._tracksFolder, Constants.TracksYamlFile, forceInstall);
         }
 
+        public async Task SyncFontsAsync(bool forceInstall)
+        {
+            await this.SyncBucketAsync(Constants.FontsBucketName, this._fontsFolder, "", forceInstall);
+        }
+
         public async Task SyncAllAsync(bool forceInstall = false)
         {
             await this.SyncCarsAsync(forceInstall);
             await this.SyncTracksAsync(forceInstall);
+            await this.SyncFontsAsync(forceInstall);
         }
     }
 }
