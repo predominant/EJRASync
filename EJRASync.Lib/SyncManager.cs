@@ -21,10 +21,10 @@ namespace EJRASync.Lib
         public SyncManager(IAmazonS3 s3Client)
         {
             this._s3Client = s3Client;
-            var steamPath = this.FindSteam();
+            var steamPath = SteamHelper.FindSteam();
             Console.WriteLine($"Steam path: {steamPath}");
 
-            var acPath = this.FindAssettoCorsa(steamPath);
+            var acPath = SteamHelper.FindAssettoCorsa(steamPath);
             Console.WriteLine($"Assetto Corsa path: {acPath}");
 
             this._carsFolder = Path.Combine(acPath, "content", this._carsFolder);
@@ -35,63 +35,6 @@ namespace EJRASync.Lib
 
             this._fontsFolder = Path.Combine(acPath, "content", this._fontsFolder);
             Console.WriteLine($"Fonts folder: {this._fontsFolder}");
-        }
-
-        /// <summary>
-        /// Finds the Steam installation path.
-        /// </summary>
-        /// <returns>Steam installation path</returns>
-        /// <exception cref="Exception"></exception>
-        private string FindSteam()
-        {
-            foreach (var (key, value) in Constants.SteamRegistryKeys)
-            {
-                var steamPath = (string)Registry.GetValue(key, value, null)!;
-                if (steamPath == null)
-                    continue;
-
-                var libPath = Path.Combine(steamPath, Constants.SteamLibraryFile);
-
-                if (!File.Exists(libPath))
-                    continue;
-
-                return libPath;
-            }
-
-            throw new Exception("Steam installation not found.");
-        }
-
-        /// <summary>
-        /// Finds the Assetto Corsa installation path.
-        /// </summary>
-        /// <param name="steamLibraryPath">Steam library path</param>
-        /// <returns>Assetto Corsa installation path</returns>
-        /// <exception cref="Exception"></exception>
-        private string FindAssettoCorsa(string steamLibraryPath)
-        {
-            var steamLibrary = File.ReadAllLines(steamLibraryPath);
-            var libraryPath = "";
-
-            foreach (var line in steamLibrary)
-            {
-                if (line.Contains('"' + "path" + '"'))
-                {
-                    libraryPath = line.Split('"')[3];
-                    continue;
-                }
-
-                if (!line.Contains('"' + Constants.AssettoCorsaAppId + '"'))
-                    continue;
-
-                var acPath = Path.Combine(libraryPath, Constants.AssettoCorsaSubPath);
-
-                if (!Directory.Exists(acPath))
-                    continue;
-
-                return acPath;
-            }
-
-            throw new Exception("Assetto Corsa installation not found.");
         }
 
         public async Task SyncBucketAsync(string bucketName, string localPath, string yamlFile, bool forceInstall)

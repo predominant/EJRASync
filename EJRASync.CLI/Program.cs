@@ -2,6 +2,9 @@
 using EJRASync.Lib;
 using System.Security.Principal;
 
+var currentUser = WindowsIdentity.GetCurrent().Name;
+Console.WriteLine($"Current user: {currentUser}");
+
 SentrySdk.Init(options =>
 {
     options.Dsn = "https://9545721f9e247759f9a2902d79123937@o323948.ingest.us.sentry.io/4507506715983872";
@@ -11,8 +14,12 @@ SentrySdk.Init(options =>
     options.ProfilesSampleRate = 1.0;
 });
 
-var currentUser = WindowsIdentity.GetCurrent().Name;
-Console.WriteLine($"Current user: {currentUser}");
+SentrySdk.ConfigureScope(scope =>
+{
+    scope.SetTag("username", currentUser);
+    scope.SetTag("steam.accountname", "");
+    scope.SetTag("steam.personaname", "");
+});
 
 var s3Client = new AmazonS3Client("", "", new AmazonS3Config
 {
