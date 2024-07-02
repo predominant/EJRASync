@@ -11,7 +11,12 @@
     <RepositoryUrl>https://github.com/predominant/EJRASync</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/predominant/EJRASync</PackageProjectUrl>
+    <ApplicationIcon>EJRA.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="EJRA.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.309.11" />
