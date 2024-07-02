@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
+    <PackageIcon>EJRA.png</PackageIcon>
+    <RepositoryUrl>https://github.com/predominant/EJRASync</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/predominant/EJRASync</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,6 +21,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EJRASync.Lib\EJRASync.Lib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="EJRA.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
