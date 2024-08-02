@@ -1,13 +1,14 @@
 ﻿using Amazon.S3;
 using EJRASync.Lib;
 using System.Security.Principal;
+using Spectre.Console;
 
 var currentUser = WindowsIdentity.GetCurrent().Name;
 Console.WriteLine($"Current user: {currentUser}");
 
 SentrySdk.Init(options =>
 {
-    options.Dsn = "https://9545721f9e247759f9a2902d79123937@o323948.ingest.us.sentry.io/4507506715983872";
+    options.Dsn = Constants.SentryDSN;
     options.Debug = false;
     options.AutoSessionTracking = true;
     options.TracesSampleRate = 1.0;
@@ -17,8 +18,8 @@ SentrySdk.Init(options =>
 SentrySdk.ConfigureScope(scope =>
 {
     scope.SetTag("username", currentUser);
-    scope.SetTag("steam.accountname", "");
-    scope.SetTag("steam.personaname", "");
+    //scope.SetTag("steam.accountname", "");
+    //scope.SetTag("steam.personaname", "");
 });
 
 var s3Client = new AmazonS3Client("", "", new AmazonS3Config
@@ -27,15 +28,29 @@ var s3Client = new AmazonS3Client("", "", new AmazonS3Config
     ForcePathStyle = true,
 });
 
-var syncManager = new SyncManager(s3Client);
+SyncManager syncManager;
 
-//var carsObjects = await syncManager.ListS3ObjectsAsync(Constants.CarsBucketName);
-//Console.WriteLine($"Cars in S3 bucket: {Constants.CarsBucketName}");
-//carsObjects.ForEach(x => Console.WriteLine($"Car: {x.Key}"));
+// Read optional parameter from the command line, if present
+if (args.Length > 0)
+{
+    var acPath = args[0];
+    AnsiConsole.MarkupLine($"[bold]Override AssettoCorsa Path:[/] {acPath}");
+    SentrySdk.ConfigureScope(scope => scope.SetTag("ac.path", acPath));
+
+    syncManager = new SyncManager(s3Client, steamPath, acPath);
+    syncManager.SyncAllAsync().Wait();
+}
+else
+{
+    syncManager = new SyncManager(s3Client);
+}
+
+
 
 syncManager.SyncAllAsync().Wait();
 
+Console.WriteLine("==============================================================================");
 Console.WriteLine("Sync complete.");
-Console.WriteLine("");
+Console.WriteLine("==============================================================================");
 Console.WriteLine("Press any key to exit.");
 Console.ReadKey();

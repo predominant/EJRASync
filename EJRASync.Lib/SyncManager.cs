@@ -18,13 +18,17 @@ namespace EJRASync.Lib
         private string _tracksFolder = "tracks";
         private string _fontsFolder = "fonts";
 
-        public SyncManager(IAmazonS3 s3Client)
+        public SyncManager(IAmazonS3 s3Client, string? acPath = null)
         {
             this._s3Client = s3Client;
             var steamPath = SteamHelper.FindSteam();
             Console.WriteLine($"Steam path: {steamPath}");
 
-            var acPath = SteamHelper.FindAssettoCorsa(steamPath);
+            if (acPath == null)
+                acPath = SteamHelper.FindAssettoCorsa(steamPath);
+            else
+                Console.WriteLine($"Override Assetto Corsa path: {acPath}");
+
             Console.WriteLine($"Assetto Corsa path: {acPath}");
 
             this._carsFolder = Path.Combine(acPath, "content", this._carsFolder);
@@ -42,6 +46,10 @@ namespace EJRASync.Lib
             Console.WriteLine($"Syncing {bucketName} to {localPath}...");
             var s3Objects = await this.ListS3ObjectsAsync(bucketName);
             // s3Objects.ForEach(o => Console.WriteLine($"Object: {o.Key}"));
+
+            // Ensure the local path exists
+            Directory.CreateDirectory(localPath);
+
             var localFiles = Directory.GetFiles(localPath, "*", SearchOption.AllDirectories);
 
             var s3Keys = s3Objects.Select(o => o.Key).ToList();

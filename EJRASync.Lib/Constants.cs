@@ -25,5 +25,8 @@ namespace EJRASync.Lib
 
         public static readonly string CarsYamlFile = "cars.yaml";
         public static readonly string TracksYamlFile = "tracks.yaml";
+
+        public static readonly string SentryDSN =
+            "https://9545721f9e247759f9a2902d79123937@o323948.ingest.us.sentry.io/4507506715983872";
     }
 }
