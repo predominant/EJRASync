@@ -37,7 +37,7 @@ if (args.Length > 0)
     AnsiConsole.MarkupLine($"[bold]Override AssettoCorsa Path:[/] {acPath}");
     SentrySdk.ConfigureScope(scope => scope.SetTag("ac.path", acPath));
 
-    syncManager = new SyncManager(s3Client, steamPath, acPath);
+    syncManager = new SyncManager(s3Client, acPath);
     syncManager.SyncAllAsync().Wait();
 }
 else
