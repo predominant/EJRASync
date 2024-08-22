@@ -14,6 +14,7 @@ namespace EJRASync.Lib
         public static readonly string CarsBucketName = "ejra-cars";
         public static readonly string TracksBucketName = "ejra-tracks";
         public static readonly string FontsBucketName = "ejra-fonts";
+        public static readonly string AppsBucketName = "ejra-apps";
 
         public static readonly Dictionary<string, string> SteamRegistryKeys = new()
         {

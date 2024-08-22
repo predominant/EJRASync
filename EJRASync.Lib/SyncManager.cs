@@ -17,6 +17,7 @@ namespace EJRASync.Lib
         private string _carsFolder = "cars";
         private string _tracksFolder = "tracks";
         private string _fontsFolder = "fonts";
+        private string _appsFolder = "";
 
         public SyncManager(IAmazonS3 s3Client, string? acPath = null)
         {
@@ -39,6 +40,9 @@ namespace EJRASync.Lib
 
             this._fontsFolder = Path.Combine(acPath, "content", this._fontsFolder);
             Console.WriteLine($"Fonts folder: {this._fontsFolder}");
+
+            this._appsFolder = acPath;
+            Console.WriteLine($"Apps folder: {this._appsFolder}");
         }
 
         public async Task SyncBucketAsync(string bucketName, string localPath, string yamlFile, bool forceInstall)
@@ -260,26 +264,24 @@ namespace EJRASync.Lib
             }
         }
 
-        public async Task SyncCarsAsync(bool forceInstall)
-        {
+        public async Task SyncCarsAsync(bool forceInstall) =>
             await this.SyncBucketAsync(Constants.CarsBucketName, this._carsFolder, Constants.CarsYamlFile, forceInstall);
-        }
 
-        public async Task SyncTracksAsync(bool forceInstall)
-        {
+        public async Task SyncTracksAsync(bool forceInstall) =>
             await this.SyncBucketAsync(Constants.TracksBucketName, this._tracksFolder, Constants.TracksYamlFile, forceInstall);
-        }
 
-        public async Task SyncFontsAsync(bool forceInstall)
-        {
+        public async Task SyncFontsAsync(bool forceInstall) =>
             await this.SyncBucketAsync(Constants.FontsBucketName, this._fontsFolder, "", forceInstall);
-        }
+
+        public async Task SyncAppsAsync(bool forceInstall) =>
+            await this.SyncBucketAsync(Constants.AppsBucketName, this._appsFolder, "", forceInstall);
 
         public async Task SyncAllAsync(bool forceInstall = false)
         {
             await this.SyncCarsAsync(forceInstall);
             await this.SyncTracksAsync(forceInstall);
             await this.SyncFontsAsync(forceInstall);
+            await this.SyncAppsAsync(forceInstall);
         }
     }
 }
