@@ -1,4 +1,5 @@
-﻿using Amazon.S3;
+﻿using System.Net.Mime;
+using Amazon.S3;
 using EJRASync.Lib;
 using System.Security.Principal;
 using Spectre.Console;
@@ -27,6 +28,9 @@ var s3Client = new AmazonS3Client("", "", new AmazonS3Config
     ServiceURL = Constants.MinioUrl,
     ForcePathStyle = true,
 });
+
+var autoUpdater = new AutoUpdater(@$"{AppContext.BaseDirectory}\EJRASync.CLI.exe");
+autoUpdater.ProcessUpdates().Wait();
 
 SyncManager syncManager;
 

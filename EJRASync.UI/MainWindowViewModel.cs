@@ -9,8 +9,8 @@ namespace EJRASync.UI
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        private AmazonS3Client _s3Client;
-        private SyncManager _syncManager;
+        public AmazonS3Client S3Client;
+        public SyncManager SyncManager;
 
         private ObservableCollection<ContentItem> _contentItems;
 
@@ -28,20 +28,22 @@ namespace EJRASync.UI
 
         public MainWindowViewModel()
         {
-            this._s3Client = new AmazonS3Client("", "", new AmazonS3Config
+            this.S3Client = new AmazonS3Client("", "", new AmazonS3Config
             {
                 ServiceURL = Constants.MinioUrl,
                 ForcePathStyle = true,
             });
+        }
 
-            this._syncManager = new SyncManager(this._s3Client);
-
+        public void Init()
+        {
+            this.SyncManager = new SyncManager(this.S3Client);
             this.GetTopLevelItems().Wait();
         }
 
         private async Task GetTopLevelItems()
         {
-            foreach (var item in await this._syncManager.ListS3FoldersAsync("ejra-cars"))
+            foreach (var item in await this.SyncManager.ListS3FoldersAsync("ejra-cars"))
             {
                 this.ContentItems.Add(new ContentItem
                 {
@@ -51,7 +53,7 @@ namespace EJRASync.UI
                 });
             }
 
-            foreach (var item in await this._syncManager.ListS3FoldersAsync("ejra-tracks"))
+            foreach (var item in await this.SyncManager.ListS3FoldersAsync("ejra-tracks"))
             {
                 this.ContentItems.Add(new ContentItem
                 {
@@ -64,7 +66,7 @@ namespace EJRASync.UI
 
         public async Task SyncContent()
         {
-            await this._syncManager.SyncAllAsync();
+            await this.SyncManager.SyncAllAsync();
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
