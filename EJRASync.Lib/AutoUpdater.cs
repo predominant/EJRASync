@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
+using System.Diagnostics;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace EJRASync.Lib
 {
@@ -30,6 +26,8 @@ namespace EJRASync.Lib
                 if (result)
                 {
                     Console.WriteLine("Update complete.");
+                    this.RestartAndExit();
+
                 }
                 else
                 {
@@ -113,6 +111,21 @@ namespace EJRASync.Lib
             }
 
             return false;
+        }
+
+        private void RestartAndExit()
+        {
+            var newProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = this._exePath,
+                    UseShellExecute = true,
+                }
+            };
+
+            newProcess.Start();
+            Environment.Exit(0);
         }
     }
 }
