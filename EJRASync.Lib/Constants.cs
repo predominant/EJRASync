@@ -8,6 +8,8 @@ namespace EJRASync.Lib
 {
     public static class Constants
     {
+        public static readonly string Version = "0.0.12";
+
         public static readonly string AssettoCorsaAppId = "244210";
         public static readonly string AssettoCorsaSubPath = @"steamapps\common\assettocorsa";
         
@@ -31,5 +33,9 @@ namespace EJRASync.Lib
             "https://9545721f9e247759f9a2902d79123937@o323948.ingest.us.sentry.io/4507506715983872";
 
         public static readonly string GithubReleaseURL = "https://api.github.com/repos/predominant/ejrasync/releases/latest";
+
+        public static readonly string ExecutableName = "EJRASync.CLI.exe";
+
+        public static readonly string UserAgent = "EJRASync.Lib.AutoUpdater";
     }
 }

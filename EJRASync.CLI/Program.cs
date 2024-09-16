@@ -29,7 +29,7 @@ var s3Client = new AmazonS3Client("", "", new AmazonS3Config
     ForcePathStyle = true,
 });
 
-var autoUpdater = new AutoUpdater(@$"{AppContext.BaseDirectory}\EJRASync.CLI.exe");
+var autoUpdater = new AutoUpdater(@$"{AppContext.BaseDirectory}\{Constants.ExecutableName}");
 autoUpdater.ProcessUpdates().Wait();
 
 SyncManager syncManager;

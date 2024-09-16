@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace EJRASync.Lib
@@ -21,10 +22,19 @@ namespace EJRASync.Lib
             Console.WriteLine($"Running from {this._exePath}");
             Console.WriteLine("Checking for updates...");
 
-            if (await this.UpdateAvailable())
+            var release = await this.UpdateAvailable(Constants.Version);
+            if (release != null)
             {
                 this.RenameExecutable();
-                await this.DownloadUpdate();
+                var result = await this.DownloadUpdate(release);
+                if (result)
+                {
+                    Console.WriteLine("Update complete.");
+                }
+                else
+                {
+                    Console.WriteLine("Update failed.");
+                }
             }
             else
             {
@@ -32,18 +42,50 @@ namespace EJRASync.Lib
             }
         }
 
-        private async Task<bool> UpdateAvailable()
+        private async Task<GitHubRelease> UpdateAvailable(string currentVersion)
         {
             // Get the JSON from the GitHub API
             // Parse the JSON
             // Compare the version number
 
-            var url = Constants.GithubReleaseURL;
-            var client = new HttpClient();
-            var response = await client.GetAsync(url);
-            var json = await response.Content.ReadAsStringAsync();
+            var release = await this.LatestRelease();
 
-            return true;
+            foreach (var asset in release.Assets)
+            {
+                if (asset.Name.EndsWith(".exe"))
+                {
+                    Console.WriteLine($"Found asset: {asset.Name}");
+                    var latestVersion = new Version(release.TagName.TrimStart('v'));
+                    
+                    var current = new Version(currentVersion);
+                    if (latestVersion > current)
+                        return release;
+                }
+            }
+
+            return null;
+        }
+
+        private async Task<GitHubRelease> LatestRelease()
+        {
+            try
+            {
+                var url = Constants.GithubReleaseURL;
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Add("User-Agent", Constants.UserAgent);
+                var response = await client.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                var release = JsonSerializer.Deserialize<GitHubRelease>(json);
+
+                return release;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         private void RenameExecutable()
@@ -51,9 +93,26 @@ namespace EJRASync.Lib
             File.Move(this._exePath, $"{this._exePath}.OLD");
         }
 
-        private async Task DownloadUpdate()
+        private async Task<bool> DownloadUpdate(GitHubRelease release)
         {
-            
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Add("User-Agent", Constants.UserAgent);
+
+            foreach (var asset in release.Assets)
+            {
+                if (asset.Name.EndsWith(".exe"))
+                {
+                    var response = await client.GetAsync(asset.BrowserDownloadUrl);
+                    response.EnsureSuccessStatusCode();
+
+                    var bytes = await response.Content.ReadAsByteArrayAsync();
+                    File.WriteAllBytes(this._exePath, bytes);
+
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }
