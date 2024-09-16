@@ -75,7 +75,7 @@ namespace EJRASync.Lib
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var release = JsonSerializer.Deserialize<GitHubRelease>(json);
+                var release = JsonSerializer.Deserialize(json, GitHubReleaseContext.Default.GitHubRelease);
 
                 return release;
             }
