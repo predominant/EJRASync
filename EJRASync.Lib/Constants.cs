@@ -8,7 +8,7 @@ namespace EJRASync.Lib
 {
     public static class Constants
     {
-        public static readonly string Version = "0.0.12";
+        public static readonly string Version = "0.0.13";
 
         public static readonly string AssettoCorsaAppId = "244210";
         public static readonly string AssettoCorsaSubPath = @"steamapps\common\assettocorsa";
